@@ -9,4 +9,5 @@
  */
 
 rootProject.name = "BTEConoSur"
-include("bukkit")
+include("1_12_2")
+include("1_20_core")
