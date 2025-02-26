@@ -7,6 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class BaseCommand implements CommandExecutor {
 
     public enum CommandMode {
@@ -17,6 +20,7 @@ public abstract class BaseCommand implements CommandExecutor {
 
     private final CommandMode commandMode;
     private final String permission;
+    private final Map<String, BaseCommand> subcommands = new HashMap<>();
     protected final BteConoSurCore plugin;
 
     public BaseCommand() {
@@ -45,24 +49,45 @@ public abstract class BaseCommand implements CommandExecutor {
             return false;
         }
 
+        if (args.length > 0) {
+            String subcommandName = args[0].toLowerCase();
+            BaseCommand subcommand = subcommands.get(subcommandName);
+
+            if (subcommand != null) {
+                return subcommand.onCommand(sender, command, label, shiftArgs(args));
+            }
+        }
+
         return execute(sender, args);
     }
 
     /**
-     * Verifica si el tipo de sender tiene permiso para ejecutar el comando.
+     * Método abstracto para manejar la ejecución del comando.
      */
+    protected abstract boolean execute(CommandSender sender, String[] args);
+
+    /**
+     * Agrega un subcomando a este comando.
+     */
+    public void addSubcommand(String name, BaseCommand subcommand) {
+        subcommands.put(name.toLowerCase(), subcommand);
+    }
+
     private boolean isAllowedSender(CommandSender sender) {
-        if (commandMode == CommandMode.PLAYER_ONLY && !(sender instanceof Player)) {
-            return false;
-        }
-        if (commandMode == CommandMode.CONSOLE_ONLY && sender instanceof Player) {
-            return false;
-        }
-        return true;
+        return switch (commandMode) {
+            case PLAYER_ONLY -> sender instanceof Player;
+            case CONSOLE_ONLY -> !(sender instanceof Player);
+            case BOTH -> true;
+        };
     }
 
     /**
-     * Método a sobrescribir para manejar la ejecución del comando.
+     * Desplaza los argumentos eliminando el primer elemento.
      */
-    protected abstract boolean execute(CommandSender sender, String[] args);
+    private String[] shiftArgs(String[] args) {
+        if (args.length <= 1) return new String[0];
+        String[] newArgs = new String[args.length - 1];
+        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        return newArgs;
+    }
 }
