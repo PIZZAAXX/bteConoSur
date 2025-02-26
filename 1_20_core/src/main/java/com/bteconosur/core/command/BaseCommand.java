@@ -49,7 +49,7 @@ public abstract class BaseCommand implements CommandExecutor {
             return false;
         }
 
-        if (args.length > 0) {
+        if (args.length > 0 && !subcommands.isEmpty()) {
             String subcommandName = args[0].toLowerCase();
             BaseCommand subcommand = subcommands.get(subcommandName);
 
