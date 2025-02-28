@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class BaseCommand implements CommandExecutor {
+public abstract class BaseCommand extends Command {
 
     public enum CommandMode {
         PLAYER_ONLY,
@@ -18,27 +18,30 @@ public abstract class BaseCommand implements CommandExecutor {
         BOTH
     }
 
+    private final String command;
     private final CommandMode commandMode;
     private final String permission;
     private final Map<String, BaseCommand> subcommands = new HashMap<>();
     protected final BteConoSurCore plugin;
 
-    public BaseCommand() {
-        this(null, CommandMode.BOTH);
+    public BaseCommand(String command) {
+        this(command, null, CommandMode.BOTH);
     }
 
-    public BaseCommand(String permission) {
-        this(permission, CommandMode.BOTH);
+    public BaseCommand(String command, String permission) {
+        this(command, permission, CommandMode.BOTH);
     }
 
-    public BaseCommand(String permission, CommandMode mode) {
+    public BaseCommand(String command, String permission, CommandMode mode) {
+        super(command);
+        this.command = command;
         this.plugin = BteConoSurCore.getPlugin();
         this.permission = permission;
         this.commandMode = mode;
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {
         if (!isAllowedSender(sender)) {
             // Implementar mensaje de que el comando no puede ser ejecutado por ese tipo de sender.
             return false;
@@ -54,23 +57,23 @@ public abstract class BaseCommand implements CommandExecutor {
             BaseCommand subcommand = subcommands.get(subcommandName);
 
             if (subcommand != null) {
-                return subcommand.onCommand(sender, command, label, shiftArgs(args));
+                return subcommand.onCommand(sender, shiftArgs(args));
             }
         }
 
-        return execute(sender, args);
+        return onCommand(sender, args);
     }
 
     /**
      * Método abstracto para manejar la ejecución del comando.
      */
-    protected abstract boolean execute(CommandSender sender, String[] args);
+    protected abstract boolean onCommand(CommandSender sender, String[] args);
 
     /**
      * Agrega un subcomando a este comando.
      */
-    public void addSubcommand(String name, BaseCommand subcommand) {
-        subcommands.put(name.toLowerCase(), subcommand);
+    public void addSubcommand(BaseCommand subcommand) {
+        subcommands.put(command.toLowerCase(), subcommand);
     }
 
     private boolean isAllowedSender(CommandSender sender) {
