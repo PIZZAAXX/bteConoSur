@@ -1,4 +1,4 @@
-package com.bteconosur.core.utils;
+package com.bteconosur.core.util;
 
 import com.bteconosur.core.BteConoSurCore;
 import org.bukkit.Bukkit;
