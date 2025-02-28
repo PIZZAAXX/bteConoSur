@@ -2,12 +2,13 @@ package com.bteconosur.core.command;
 
 import com.bteconosur.core.BteConoSurCore;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class BaseCommand extends Command {
@@ -65,6 +66,30 @@ public abstract class BaseCommand extends Command {
     }
 
     /**
+     * Método para autocompletar el comando si tiene subcomandos.
+     */
+    @Override
+    public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
+        BaseCommand currentCommand = this;
+        for (int i = 0; i < args.length - 1; i++) {
+            BaseCommand nextCommand = currentCommand.subcommands.get(args[i].toLowerCase());
+            if (nextCommand == null) {
+                return super.tabComplete(sender, alias, args);
+            }
+            currentCommand = nextCommand;
+        }
+
+        List<String> completions = new ArrayList<>();
+        for (String subcommand : currentCommand.subcommands.keySet()) {
+            if (subcommand.startsWith(args[args.length - 1].toLowerCase())) {
+                completions.add(subcommand);
+            }
+        }
+
+        return completions.isEmpty() ? super.tabComplete(sender, alias, args) : completions;
+    }
+
+    /**
      * Método abstracto para manejar la ejecución del comando.
      */
     protected abstract boolean onCommand(CommandSender sender, String[] args);
@@ -73,9 +98,12 @@ public abstract class BaseCommand extends Command {
      * Agrega un subcomando a este comando.
      */
     public void addSubcommand(BaseCommand subcommand) {
-        subcommands.put(command.toLowerCase(), subcommand);
+        subcommands.put(subcommand.getCommand(), subcommand);
     }
 
+    /**
+     * Verifica si el sender es un tipo de sender permitido.
+     */
     private boolean isAllowedSender(CommandSender sender) {
         return switch (commandMode) {
             case PLAYER_ONLY -> sender instanceof Player;
@@ -92,5 +120,12 @@ public abstract class BaseCommand extends Command {
         String[] newArgs = new String[args.length - 1];
         System.arraycopy(args, 1, newArgs, 0, newArgs.length);
         return newArgs;
+    }
+
+    /**
+     * Obtiene el nombre del comando.
+     */
+    public String getCommand() {
+        return command;
     }
 }
