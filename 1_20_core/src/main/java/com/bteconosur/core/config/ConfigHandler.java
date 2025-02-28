@@ -14,26 +14,21 @@ public class ConfigHandler {
     private File file;
     private final String fileName;
 
-    public ConfigHandler(String fileName) throws IOException, InvalidConfigurationException {
+    public ConfigHandler(String fileName) {
         this.fileName = fileName;
-        this.register();
     }
 
     /**
      * Crea un archivo de configuración si no existe y carga la configuración.
-     *
-     * @throws IOException Si el archivo no se puede crear.
-     * @throws InvalidConfigurationException Si la configuración es inválida.
      */
-    public void register() throws IOException, InvalidConfigurationException {
+    public void register() {
         this.file = new File(plugin.getDataFolder(), fileName);
 
         if (!this.file.exists()) {
             plugin.saveResource(fileName, false);
         }
 
-        this.fileConfiguration = new YamlConfiguration();
-        this.fileConfiguration.load(this.file);
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(this.file);
     }
 
     /**

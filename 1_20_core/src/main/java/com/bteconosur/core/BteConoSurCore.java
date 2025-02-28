@@ -1,22 +1,15 @@
 package com.bteconosur.core;
 
-import com.bteconosur.core.config.ConfigFile;
-import org.bukkit.configuration.InvalidConfigurationException;
+import com.bteconosur.core.config.PluginConfig;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
 
 public final class BteConoSurCore extends JavaPlugin {
 
     @Override
     public void onEnable() {
         // Plugin startup logic
-        try {
-            ConfigFile.saveDefaultConfig();
-        } catch (IOException | InvalidConfigurationException e) {
-            this.disablePlugin();
-            throw new RuntimeException(e);
-        }
+        PluginConfig.createFiles();
     }
 
     @Override
