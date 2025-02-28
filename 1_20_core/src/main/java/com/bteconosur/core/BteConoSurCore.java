@@ -1,7 +1,7 @@
 package com.bteconosur.core;
 
 import com.bteconosur.core.config.PluginConfig;
-import com.bteconosur.core.util.PluginRegistry;
+import com.bteconosur.core.utils.PluginRegistry;
 import org.bukkit.command.CommandMap;
 import org.bukkit.plugin.java.JavaPlugin;
 
